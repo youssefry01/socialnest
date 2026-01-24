@@ -1,0 +1,253 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+    Home
+{% endblock %}
+
+{% block content %}
+    <div class="max-w-4xl mx-auto">
+        <!-- Tab Navigation -->
+        {% if user_is_authenticated and following_posts %}
+            <div class="flex gap-4 mb-8 border-b border-gray-200">
+                <button 
+                    onclick="showTab('all')" 
+                    id="all-tab"
+                    class="px-6 py-3 text-lg font-semibold text-blue-600 border-b-2 border-blue-600 transition-colors active-tab"
+                >
+                    <i class="fas fa-globe"></i> Discover
+                </button>
+                <button 
+                    onclick="showTab('following')" 
+                    id="following-tab"
+                    class="px-6 py-3 text-lg font-semibold text-gray-600 border-b-2 border-transparent hover:text-gray-900 transition-colors"
+                >
+                    <i class="fas fa-users"></i> Following
+                </button>
+            </div>
+        {% endif %}
+
+        <!-- Following Feed -->
+        {% if user_is_authenticated and following_posts %}
+            <section id="following" class="tab-content grid gap-6 hidden">
+                {% if following_posts %}
+                    {% for post in following_posts %}
+                        <article class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                            <!-- Post Header with Avatar -->
+                            <div class="p-4 border-b border-gray-100">
+                                <div class="flex items-center justify-between">
+                                    <a href="{% url 'users:profile' post.author.username %}" class="flex items-center gap-3 flex-1 hover:opacity-80 transition-opacity">
+                                        {% if post.author.profile.avatar %}
+                                            <img src="{{ post.author.profile.avatar.url }}" alt="{{ post.author.username }}" class="w-10 h-10 rounded-full object-cover">
+                                        {% else %}
+                                            <div class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center">
+                                                <i class="fas fa-user text-gray-600"></i>
+                                            </div>
+                                        {% endif %}
+                                        <div>
+                                            <p class="font-semibold text-gray-900">{{ post.author.get_full_name|default:post.author.username }}</p>
+                                            <p class="text-xs text-gray-500">@{{ post.author.username }}</p>
+                                        </div>
+                                    </a>
+                                    <span class="text-xs text-gray-500">{{ post.date|timesince }} ago</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Post Content -->
+                            <div class="p-4">
+                                <p class="text-gray-800 text-base leading-relaxed">{{ post.body }}</p>
+                            </div>
+                            
+                            <!-- Post Image(s) -->
+                            {% if post.images.all %}
+                                <div class="grid grid-cols-2 gap-1 relative">
+                                    {% for img in post.images.all|slice:":4" %}
+                                        {% if forloop.last and post.images.all|length > 4 %}
+                                            <a href="{% url 'posts:page' post.id %}" class="relative block group">
+                                                <img src="{{ img.image.url }}" alt="Post image" class="w-full h-auto object-cover">
+                                                <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center group-hover:bg-opacity-70 transition-all">
+                                                    <span class="text-white text-2xl font-bold">+{{ post.images.all|length|add:"-4" }} more</span>
+                                                </div>
+                                            </a>
+                                        {% else %}
+                                            <img src="{{ img.image.url }}" alt="Post image" class="w-full h-auto object-cover">
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Post Actions -->
+                            <div class="px-4 py-3 border-t border-gray-100 flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    {% if user.is_authenticated %}
+                                        <form action="{% url 'posts:like-post' post.id %}" method="POST" class="inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="flex items-center gap-2 px-3 py-1.5 rounded-full hover:bg-red-50 transition-colors group">
+                                                {% if user in post.likes.all %}
+                                                    <i class="fas fa-heart text-red-600 text-lg"></i>
+                                                    <span class="text-sm font-semibold text-red-600">{{ post.total_likes }}</span>
+                                                {% else %}
+                                                    <i class="fas fa-heart text-gray-400 text-lg group-hover:text-red-600"></i>
+                                                    <span class="text-sm font-semibold text-gray-600 group-hover:text-red-600">{{ post.total_likes }}</span>
+                                                {% endif %}
+                            </button>
+                        </form>
+                    {% else %}
+                        <div class="flex items-center gap-2 px-3 py-1.5">
+                            <i class="fas fa-heart text-gray-400 text-lg"></i>
+                            <span class="text-sm font-semibold text-gray-600">{{ post.total_likes }}</span>
+                        </div>
+                    {% endif %}
+                </div>
+                <a href="{% url 'posts:page' post.id %}" class="text-gray-500 hover:text-blue-600 text-sm font-medium transition-colors">
+                    View Post
+                </a>
+            </div>
+        </article>
+                    {% endfor %}
+                {% else %}
+                    <div class="bg-blue-50 rounded-lg shadow-md p-12 text-center">
+                        <i class="fas fa-inbox text-5xl text-blue-300 mb-4"></i>
+                        <p class="text-blue-900 text-lg font-semibold">No posts from people you follow yet.</p>
+                        <p class="text-blue-700 mt-2">Follow more users to see their posts here!</p>
+                        <a href="#all" onclick="showTab('all')" class="inline-block mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                            Discover Posts
+                        </a>
+                    </div>
+                {% endif %}
+            </section>
+        {% endif %}
+
+        <!-- All Posts Feed -->
+        <section id="all" class="tab-content grid gap-6 show">
+            {% if all_posts %}
+                {% for post in all_posts %}
+                    <article class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                        <!-- Post Header with Avatar -->
+                        <div class="p-4 border-b border-gray-100">
+                            <div class="flex items-center justify-between">
+                                <a href="{% url 'users:profile' post.author.username %}" class="flex items-center gap-3 flex-1 hover:opacity-80 transition-opacity">
+                                    {% if post.author.profile.avatar %}
+                                        <img src="{{ post.author.profile.avatar.url }}" alt="{{ post.author.username }}" class="w-10 h-10 rounded-full object-cover">
+                                    {% else %}
+                                        <div class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center">
+                                            <i class="fas fa-user text-gray-600"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div>
+                                        <p class="font-semibold text-gray-900">{{ post.author.get_full_name|default:post.author.username }}</p>
+                                        <p class="text-xs text-gray-500">@{{ post.author.username }}</p>
+                                    </div>
+                                </a>
+                                <span class="text-xs text-gray-500">{{ post.date|timesince }} ago</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Post Content -->
+                        <div class="p-4">
+                            <p class="text-gray-800 text-base leading-relaxed">{{ post.body }}</p>
+                        </div>
+                        
+                        <!-- Post Image(s) -->
+                        {% if post.images.all %}
+                            <div class="grid grid-cols-2 gap-1 relative">
+                                {% for img in post.images.all|slice:":4" %}
+                                    {% if forloop.last and post.images.all|length > 4 %}
+                                        <a href="{% url 'posts:page' post.id %}" class="relative block group">
+                                            <img src="{{ img.image.url }}" alt="Post image" class="w-full h-auto object-cover">
+                                            <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center group-hover:bg-opacity-70 transition-all">
+                                                <span class="text-white text-2xl font-bold">+{{ post.images.all|length|add:"-4" }} more</span>
+                                            </div>
+                                        </a>
+                                    {% else %}
+                                        <img src="{{ img.image.url }}" alt="Post image" class="w-full h-auto object-cover">
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Post Actions -->
+                        <div class="px-4 py-3 border-t border-gray-100 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                {% if user.is_authenticated %}
+                                    <form action="{% url 'posts:like-post' post.id %}" method="POST" class="inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="flex items-center gap-2 px-3 py-1.5 rounded-full hover:bg-red-50 transition-colors group">
+                                            {% if user in post.likes.all %}
+                                                <i class="fas fa-heart text-red-600 text-lg"></i>
+                                                <span class="text-sm font-semibold text-red-600">{{ post.total_likes }}</span>
+                                            {% else %}
+                                                <i class="fas fa-heart text-gray-400 text-lg group-hover:text-red-600"></i>
+                                                <span class="text-sm font-semibold text-gray-600 group-hover:text-red-600">{{ post.total_likes }}</span>
+                                            {% endif %}
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <div class="flex items-center gap-2 px-3 py-1.5">
+                                        <i class="fas fa-heart text-gray-400 text-lg"></i>
+                                        <span class="text-sm font-semibold text-gray-600">{{ post.total_likes }}</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <a href="{% url 'posts:page' post.id %}" class="text-gray-500 hover:text-blue-600 text-sm font-medium transition-colors">
+                                View Post
+                            </a>
+                        </div>
+                    </article>
+                {% endfor %}
+            {% else %}
+                <div class="bg-white rounded-lg shadow-md p-12 text-center">
+                    <i class="fas fa-inbox text-5xl text-gray-300 mb-4"></i>
+                    <p class="text-gray-600 text-lg">No posts available yet.</p>
+                </div>
+            {% endif %}
+        </section>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            // Hide all tabs
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => {
+                tab.classList.remove('show');
+                tab.classList.add('hidden');
+            });
+            
+            // Remove active class from all buttons
+            const buttons = document.querySelectorAll('[id$="-tab"]');
+            buttons.forEach(button => {
+                button.classList.remove('border-blue-600', 'text-blue-600');
+                button.classList.add('border-transparent', 'text-gray-600');
+            });
+            
+            // Show selected tab
+            const selectedTab = document.getElementById(tabName);
+            if (selectedTab) {
+                selectedTab.classList.remove('hidden');
+                selectedTab.classList.add('show');
+            }
+            
+            // Activate selected button
+            const selectedButton = document.getElementById(tabName + '-tab');
+            if (selectedButton) {
+                selectedButton.classList.remove('border-transparent', 'text-gray-600');
+                selectedButton.classList.add('border-blue-600', 'text-blue-600');
+            }
+        }
+    </script>
+
+    <style>
+        .tab-content {
+            transition: opacity 0.3s ease-in-out;
+        }
+        
+        .tab-content.hidden {
+            display: none;
+            opacity: 0;
+        }
+        
+        .tab-content.show {
+            display: grid;
+            opacity: 1;
+        }
+    </style>
+{% endblock %}

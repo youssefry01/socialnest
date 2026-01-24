@@ -1,0 +1,183 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+    {{ profile_user.username }}'s Profile
+{% endblock %}
+
+{% block content %}
+    <div class="max-w-4xl mx-auto">
+        <!-- Profile Header -->
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
+            <div class="h-32 bg-gradient-to-r from-blue-500 to-blue-700"></div>
+            
+            <div class="px-6 pb-6 relative">
+                <!-- Avatar and Basic Info -->
+                <div class="flex flex-col sm:flex-row items-start sm:items-end gap-6 mb-4 mt--16" style="margin-top: -30px;">
+                    {% if profile.avatar %}
+                        <img src="{{ profile.avatar.url }}" alt="{{ profile_user.username }}" class="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover">
+                    {% else %}
+                        <div class="w-32 h-32 rounded-full border-4 border-white shadow-lg bg-gray-300 flex items-center justify-center">
+                            <i class="fas fa-user text-5xl text-gray-500"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="flex-grow">
+                        <h1 class="text-3xl font-bold text-gray-900">
+                            {% if profile_user.first_name or profile_user.last_name %}
+                                {{ profile_user.first_name }} {{ profile_user.last_name }}
+                            {% else %}
+                                {{ profile_user.username }}
+                            {% endif %}
+                        </h1>
+                        <p class="text-gray-600 text-lg">@{{ profile_user.username }}</p>
+                        <p class="text-gray-500 mt-1">Joined {{ profile_user.date_joined|date:"F Y" }}</p>
+                    </div>
+                    
+                    <div class="flex flex-col gap-2 sm:flex-row">
+                        {% if user == profile_user %}
+                            <a href="{% url 'users:edit-profile' %}" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold flex items-center gap-2 justify-center">
+                                <i class="fas fa-edit"></i>
+                                Edit Profile
+                            </a>
+                        {% else %}
+                            {% if user.is_authenticated %}
+                                {% if is_following %}
+                                    <form method="post" action="{% url 'users:unfollow' profile_user.username %}" class="w-full sm:w-auto">
+                                        {% csrf_token %}
+                                        <button type="submit" class="w-full px-6 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition-colors font-semibold flex items-center gap-2 justify-center">
+                                            <i class="fas fa-user-check"></i>
+                                            Following
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <form method="post" action="{% url 'users:follow' profile_user.username %}" class="w-full sm:w-auto">
+                                        {% csrf_token %}
+                                        <button type="submit" class="w-full px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold flex items-center gap-2 justify-center">
+                                            <i class="fas fa-user-plus"></i>
+                                            Follow
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Profile Info -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-blue-600">{{ post_count }}</div>
+                        <div class="text-gray-600">Posts</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-blue-600">{{ follower_count }}</div>
+                        <div class="text-gray-600">Followers</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-blue-600">{{ following_count }}</div>
+                        <div class="text-gray-600">Following</div>
+                    </div>
+                </div>
+
+                <!-- Bio and Details -->
+                {% if profile.bio %}
+                    <div class="space-y-3">
+                        <p class="text-gray-700">{{ profile.bio }}</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- User's Posts -->
+        {% if user_posts %}
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                    <i class="fas fa-pen-nib"></i>
+                    Posts by {{ profile_user.username }}
+                </h2>
+                
+                <div class="space-y-6">
+                    {% for post in user_posts %}
+                        <article class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                            <!-- Post Header -->
+                            <div class="p-4 border-b border-gray-100">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        {% if profile.avatar %}
+                                            <img src="{{ profile.avatar.url }}" alt="{{ profile_user.username }}" class="w-10 h-10 rounded-full object-cover">
+                                        {% else %}
+                                            <div class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center">
+                                                <i class="fas fa-user text-gray-600"></i>
+                                            </div>
+                                        {% endif %}
+                                        <div>
+                                            <p class="font-semibold text-gray-900">{{ profile_user.get_full_name|default:profile_user.username }}</p>
+                                            <p class="text-xs text-gray-500">@{{ profile_user.username }}</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-xs text-gray-500">{{ post.date|timesince }} ago</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Post Content -->
+                            <div class="p-4">
+                                <p class="text-gray-800 leading-relaxed">{{ post.body }}</p>
+                            </div>
+                            
+                            <!-- Post Image(s) -->
+                            {% if post.images.all %}
+                                <div class="grid grid-cols-2 gap-1 relative">
+                                    {% for img in post.images.all|slice:":4" %}
+                                        {% if forloop.last and post.images.all|length > 4 %}
+                                            <a href="{% url 'posts:page' post.id %}" class="relative block group">
+                                                <img src="{{ img.image.url }}" alt="Post image" class="w-full h-auto object-cover">
+                                                <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center group-hover:bg-opacity-70 transition-all">
+                                                    <span class="text-white text-2xl font-bold">+{{ post.images.all|length|add:"-4" }} more</span>
+                                                </div>
+                                            </a>
+                                        {% else %}
+                                            <img src="{{ img.image.url }}" alt="Post image" class="w-full h-auto object-cover">
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Post Actions -->
+                            <div class="px-4 py-3 border-t border-gray-100 flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    {% if user.is_authenticated %}
+                                        <form action="{% url 'posts:like-post' post.id %}" method="POST" class="inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="flex items-center gap-2 px-3 py-1.5 rounded-full hover:bg-red-50 transition-colors group">
+                                                {% if user in post.likes.all %}
+                                                    <i class="fas fa-heart text-red-600 text-lg"></i>
+                                                    <span class="text-sm font-semibold text-red-600">{{ post.total_likes }}</span>
+                                                {% else %}
+                                                    <i class="fas fa-heart text-gray-400 text-lg group-hover:text-red-600"></i>
+                                                    <span class="text-sm font-semibold text-gray-600 group-hover:text-red-600">{{ post.total_likes }}</span>
+                                                {% endif %}
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <div class="flex items-center gap-2 px-3 py-1.5">
+                                            <i class="fas fa-heart text-gray-400 text-lg"></i>
+                                            <span class="text-sm font-semibold text-gray-600">{{ post.total_likes }}</span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <a href="{% url 'posts:page' post.id %}" class="text-gray-500 hover:text-blue-600 text-sm font-medium transition-colors">
+                                    View Post
+                                </a>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            </div>
+        {% else %}
+            <div class="bg-white rounded-lg shadow-md p-12 text-center">
+                <i class="fas fa-inbox text-5xl text-gray-300 mb-4"></i>
+                <p class="text-gray-600 text-lg">{{ profile_user.username }} hasn't posted anything yet.</p>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

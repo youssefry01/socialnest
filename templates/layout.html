@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        {% block title %}
+            SocialNest - Connect & Share
+        {% endblock %}
+    </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="{% static 'js/main.js' %}" defer></script>
+</head>
+<body class="bg-gray-50 flex flex-col min-h-screen">
+    <nav class="bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Brand/Logo -->
+                <div class="flex items-center gap-2">
+                    <a href="/" class="flex items-center gap-2 text-white hover:text-blue-100 transition-colors group">
+                        <i class="fas fa-globe text-3xl"></i>
+                        <div class="flex flex-col">
+                            <span class="text-xl font-bold">SocialNest</span>
+                            <span class="text-xs text-blue-100 hidden sm:block">Connect & Share</span>
+                        </div>
+                    </a>
+                </div>
+                
+                <!-- Navigation Items -->
+                {% if user.is_authenticated %}
+                    <div class="flex items-center gap-4">
+                        <a href="{% url 'posts:new-post' %}" class="flex items-center gap-2 px-4 py-2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-lg transition-all font-medium" title="New Post">
+                            <i class="fas fa-plus"></i>
+                            <span class="hidden sm:inline">New Post</span>
+                        </a>
+                        <!-- User Dropdown -->
+                        <div class="relative" id="userMenuContainer">
+                            <button type="button" onclick="document.getElementById('userMenu').classList.toggle('hidden'); return false;" class="flex items-center gap-2 px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-colors font-semibold" title="User Menu">
+                                <i class="fas fa-user-circle"></i>
+                                <span class="hidden sm:inline">{{ user.username }}</span>
+                                <i class="fas fa-chevron-down text-sm"></i>
+                            </button>
+                            <!-- Dropdown Menu -->
+                            <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl overflow-hidden" style="z-index: 9999;">
+                                <a href="{% url 'users:profile' user.username %}" class="block px-4 py-3 text-gray-700 hover:bg-blue-50 transition-colors">
+                                    <i class="fas fa-user text-blue-600"></i>
+                                    <span>My Profile</span>
+                                </a>
+                                <form action="{% url 'users:logout' %}" method="post" class="w-full">
+                                    {% csrf_token %}
+                                    <button type="submit" class="w-full text-left px-4 py-3 text-gray-700 hover:bg-red-50 transition-colors border-t border-gray-100">
+                                        <i class="fas fa-sign-out-alt text-red-600"></i>
+                                        <span>Logout</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="flex items-center gap-3">
+                        <a href="{% url 'users:register' %}" class="px-4 py-2 bg-white bg-opacity-20 text-white rounded-lg hover:bg-opacity-30 transition-all font-medium hidden sm:inline-block" title="Register"><i class="fas fa-pen"></i> Register</a>
+                        <a href="{% url 'users:login' %}" class="px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-colors font-semibold" title="Login"><i class="fas fa-lock"></i> Login</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+    
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        {% block content %}
+        {% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-300 mt-auto w-full">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <!-- Brand Section -->
+                <div class="col-span-1 md:col-span-1">
+                    <div class="flex items-center gap-2 mb-4">
+                        <i class="fas fa-globe text-2xl"></i>
+                        <div>
+                            <h3 class="text-lg font-bold text-white">SocialNest</h3>
+                            <p class="text-xs text-gray-400">Connect & Share</p>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-400">Building meaningful connections in the digital world.</p>
+                </div>
+                
+                <!-- Quick Links -->
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2">
+                        <li><a href="/" class="text-gray-400 hover:text-white transition-colors"><i class="fas fa-house"></i> Home</a></li>
+                        <li><a href="{% url 'core:about' %}" class="text-gray-400 hover:text-white transition-colors"><i class="fas fa-circle-info"></i> About</a></li>
+                        <li><a href="{% url 'posts:new-post' %}" class="text-gray-400 hover:text-white transition-colors"><i class="fas fa-pen-nib"></i> Write</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Legal -->
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Legal</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Privacy Policy</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Terms of Service</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Cookie Policy</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Contact -->
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Connect</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors"><i class="fas fa-envelope mr-3"></i>youssefry01@gmail.com</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors"><i class="fas fa-comments mr-2"></i>Support</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors"><i class="fas fa-bug mr-2"></i>Report Issue</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Bottom Bar -->
+            <div class="border-t border-gray-800 pt-8 flex flex-col sm:flex-row justify-between items-center">
+                <p class="text-gray-400 text-sm">&copy; 2026 SocialNest. All rights reserved.</p>
+                <div class="flex gap-6 mt-4 sm:mt-0">
+                    <a href="https://www.linkedin.com/in/youssefry" class="text-gray-400 hover:text-white transition-colors text-xl" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                    <a href="https://github.com/youssefry01/socialnest" class="text-gray-400 hover:text-white transition-colors text-xl" title="Github"><i class="fab fa-github"></i></a>
+                    <a href="https://www.instagram.com/youssefry01" class="text-gray-400 hover:text-white transition-colors text-xl" title="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.twitter.com/youssefry01" class="text-gray-400 hover:text-white transition-colors text-xl" title="Twitter"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,37 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+    Home
+{% endblock %}
+
+{% block content %}
+    <section id="posts_section">
+    {% for post in posts %}
+        <article class="post">
+            
+            <!-- Post details -->
+            <h2>
+                <a href="{%  url 'posts:page' post.id %}">
+                    {{ post.title }}
+                </a>
+            </h2>
+            <p>{{ post.date }} by {{ post.author }}</p>
+            <p>{{ post.body }}</p>
+            <p id="likes-label">❤ <span style="color: black;">{{ post.total_likes }}</span></p>
+
+            <!-- Like/Unlike buttons -->
+            {% if user.is_authenticated %}
+            <form action="{% url 'posts:like-post' post.id %}" method="POST">
+                {% csrf_token %}
+                {% if user in post.likes.all %}
+                    <button type="submit" class="danger-btn">Unlike</button>
+                {% else %}
+                    <button type="submit" class="btn">Like</button>
+                {% endif %}
+            </form>
+            {% endif %}
+
+        </article>
+    {% endfor %}
+</section>
+{% endblock %}

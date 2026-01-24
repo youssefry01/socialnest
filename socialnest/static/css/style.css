@@ -1,0 +1,164 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0 auto;
+    min-height: 100vh;
+    max-width: 800px;
+    background-color: #f7f7f8;
+    color: black;
+    font-size: 3rem;
+}
+
+nav {
+    text-align: center;
+    padding: 1rem;
+    background-color: #ffffff;
+    color: black;
+    font-size: 2.5rem;
+    filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.1));
+}
+
+main {
+    padding: 1rem;
+}
+
+section {
+    display: flex;
+    flex-flow: column;
+    gap: 1rem;
+}
+
+h1,
+h2 {
+    font-size: 2.5rem;
+}
+
+p {
+    font-size: 1rem;
+}
+
+a {
+    text-decoration: none;
+    color: #81dbb8;
+}
+
+a:hover {
+    opacity: .85;
+}
+
+.post {
+    background-color: white;
+    border-radius: 1rem;
+    margin: 0.5rem;
+    padding: 1rem;
+}
+
+.post a{
+    text-decoration: none;
+    color:  black;
+}
+
+.banner {
+    display: block;
+    width: 100%;
+    max-width: 800px;
+}
+
+.form-with-validation {
+    max-width: 600px;
+    font-size: 1rem;
+    padding: 1rem;
+    display: flex;
+    flex-flow: column;
+    gap: 1rem;
+}
+
+.form-with-validation div {
+    display: flex;
+    flex-flow: column;
+    gap: 0.5rem;
+}
+
+.form-with-validation input {
+    padding: 0.25rem;
+    max-width: 300px;
+}
+
+.form-submit {
+    padding: 0.5rem;
+    border-radius: 10px;
+    width: 125px;
+}
+
+.helptext {
+    font-size: 1rem;
+    margin-left: 1rem;
+}
+
+.helptext ul {
+    list-style-type: none;
+}
+
+.errorlist {
+    color: #F00;
+    margin-left: 2rem;
+}
+
+.errorlist li::marker {
+    content: '🚨 ';
+}
+
+.logout {
+    display: inline-block;
+}
+
+.logout-button {
+    font-size: 2.5rem;
+    background-color: rgb(0, 0, 0, 0);
+    border: none;
+}
+
+.logout-button:hover {
+    opacity: .85;
+}
+
+.btn {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem; 
+    padding-left: 1rem;
+    padding-right: 1rem; 
+    border-radius: 0.25rem; 
+    font-weight: 600; 
+    color: #ffffff;
+    background-color: #2b6ed3;
+    border-radius: 0.25rem; 
+}
+.btn:hover {
+    background-color: #124899;
+}
+
+.danger-btn {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem; 
+    padding-left: 1rem;
+    padding-right: 1rem; 
+    border-radius: 0.25rem; 
+    font-weight: 600; 
+    color: #ffffff;
+    background-color: #cf2121;
+    border-radius: 0.25rem; 
+}
+.danger-btn:hover {
+    background-color: #811616;
+}
+
+#likes-label {
+    display: flex;
+    align-items: center;
+    color: red;
+    font-size: 1.5rem;
+}

@@ -1,0 +1,88 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+    Create Your Account
+{% endblock %}
+
+{% block content %}
+    <div class="flex items-center justify-center">
+        <div class="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
+            <!-- Header -->
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Join SocialNest</h1>
+                <p class="text-gray-600">Create your account and start connecting with the community</p>
+            </div>
+
+            <!-- Registration Form -->
+            <form action="{% url 'users:register' %}" method="post" class="space-y-6">
+                {% csrf_token %}
+
+                <!-- Form Fields with Tailwind Styling -->
+                {% for field in form %}
+                    {% if field.field.widget.input_type != 'hidden' %}
+                        <div class="space-y-2">
+                            <label for="{{ field.id_for_label }}" class="block text-sm font-semibold text-gray-700">
+                                {{ field.label }}
+                                {% if not field.field.required %}
+                                    <span class="text-gray-500 font-normal">(optional)</span>
+                                {% endif %}
+                            </label>
+                            
+                            {% if field.field.widget.input_type == 'textarea' %}
+                                <textarea 
+                                    id="{{ field.id_for_label }}"
+                                    name="{{ field.html_name }}"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                                    {% if field.field.required %}required{% endif %}
+                                >{{ field.value|default:'' }}</textarea>
+                            {% else %}
+                                <input 
+                                    type="{{ field.field.widget.input_type }}"
+                                    id="{{ field.id_for_label }}"
+                                    name="{{ field.html_name }}"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition {% if field.errors %}border-red-500{% endif %}"
+                                    {% if field.field.required %}required{% endif %}
+                                    value="{{ field.value|default:'' }}"
+                                />
+                            {% endif %}
+
+                            <!-- Help Text -->
+                            {% if field.help_text %}
+                                <div class="text-xs text-gray-600 bg-blue-50 rounded p-3 mt-2 space-y-1">
+                                    {{ field.help_text|safe }}
+                                </div>
+                            {% endif %}
+
+                            <!-- Error Messages -->
+                            {% if field.errors %}
+                                <div class="space-y-1">
+                                    {% for error in field.errors %}
+                                        <p class="text-sm text-red-600 font-medium">🚨 {{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+
+                <!-- Submit Button -->
+                <button 
+                    type="submit" 
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 mt-8"
+                >
+                    Create Account
+                </button>
+            </form>
+
+            <!-- Login Link -->
+            <div class="mt-6 text-center">
+                <p class="text-gray-600">
+                    Already have an account? 
+                    <a href="{% url 'users:login' %}" class="text-blue-600 hover:text-blue-700 font-semibold">
+                        Sign In
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+{% endblock %}
